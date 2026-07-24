@@ -10,9 +10,19 @@ frontend:
       commands:
         - cd my-app && npm run build
   artifacts:
-    baseDirectory: my-app/.next/standalone
+    baseDirectory: my-app
     files:
-      - '**/*'
+      - '.next/standalone/**/*'
+      - '.next/static/**/*'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.js'
+      - 'next-env.d.ts'
+      - 'app/**/*'
+      - 'components/**/*'
+      - 'lib/**/*'
+      - 'hooks/**/*'
+      - 'public/**/*'
   cache:
     paths:
       - node_modules/**/*
