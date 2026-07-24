@@ -9,20 +9,13 @@ frontend:
     build:
       commands:
         - cd my-app && npm run build
+    start:
+      commands:
+        - cd my-app/.next/standalone && PORT=$PORT HOSTNAME=0.0.0.0 node server.js
   artifacts:
-    baseDirectory: my-app
+    baseDirectory: my-app/.next/standalone
     files:
-      - '.next/standalone/**/*'
-      - '.next/static/**/*'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'next.config.js'
-      - 'next-env.d.ts'
-      - 'app/**/*'
-      - 'components/**/*'
-      - 'lib/**/*'
-      - 'hooks/**/*'
-      - 'public/**/*'
+      - '**/*'
   cache:
     paths:
       - node_modules/**/*
