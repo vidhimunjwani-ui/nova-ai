@@ -1,9 +1,6 @@
 {
   "name": "chat-gpt",
   "private": true,
-  "workspaces": [
-    "my-app"
-  ],
   "scripts": {
     "dev": "npm --prefix my-app run dev",
     "build": "npm --prefix my-app run build",

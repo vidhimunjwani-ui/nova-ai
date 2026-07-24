@@ -1,0 +1,26 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: my-app
+    files:
+      - '.next/**/*'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.js'
+      - 'next-env.d.ts'
+      - 'app/**/*'
+      - 'components/**/*'
+      - 'lib/**/*'
+      - 'public/**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - my-app/node_modules/**/*
+      - my-app/.next/cache/**/*
