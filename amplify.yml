@@ -1,9 +1,11 @@
 version: 1
+runtime-versions:
+  nodejs: 20
 frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - cd my-app && npm ci
     build:
       commands:
         - npm run build

@@ -2,6 +2,9 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.18.0"
+  },
   "scripts": {
     "dev": "cross-env NEXT_DISABLE_TURBOPACK=1 next dev --webpack",
     "build": "next build",
