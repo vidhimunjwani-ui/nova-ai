@@ -10,7 +10,7 @@ frontend:
       commands:
         - cd $([ -d my-app ] && echo my-app || echo .) && npm run build
   artifacts:
-    baseDirectory: my-app/.next
+    baseDirectory: my-app
     files:
       - '**/*'
   cache:
