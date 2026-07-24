@@ -8,11 +8,12 @@ frontend:
         - cd my-app && npm ci
     build:
       commands:
-        - npm run build
+        - cd my-app && npm run build
   artifacts:
     baseDirectory: my-app
     files:
       - '.next/**/*'
+      - '.next/standalone/**/*'
       - 'package.json'
       - 'package-lock.json'
       - 'next.config.js'
@@ -20,6 +21,7 @@ frontend:
       - 'app/**/*'
       - 'components/**/*'
       - 'lib/**/*'
+      - 'hooks/**/*'
       - 'public/**/*'
   cache:
     paths:
