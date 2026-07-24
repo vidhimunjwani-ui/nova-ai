@@ -5,15 +5,15 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd my-app && npm ci
+        - npm ci
     build:
       commands:
-        - cd my-app && npm run build
+        - npm run build
     start:
       commands:
-        - cd my-app/.next/standalone && PORT=$PORT HOSTNAME=0.0.0.0 node server.js
+        - cd .next/standalone && PORT=$PORT HOSTNAME=0.0.0.0 node server.js
   artifacts:
-    baseDirectory: my-app/.next/standalone
+    baseDirectory: .next/standalone
     files:
       - '**/*'
   cache:
