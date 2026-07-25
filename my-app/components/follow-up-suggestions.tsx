@@ -13,16 +13,16 @@ export const ThreadFollowupSuggestions: FC = () => {
         s.thread.suggestions.length > 0
       }
     >
-      <div className="aui-thread-followup-suggestions flex min-h-8 items-center justify-center gap-2">
+      <div className="aui-thread-followup-suggestions flex min-h-8 flex-wrap items-center justify-center gap-2">
         {suggestions.map((suggestion, idx) => (
           <ThreadPrimitive.Suggestion
             key={idx}
-            className="aui-thread-followup-suggestion bg-background hover:bg-muted/80 rounded-full border px-3 py-1 text-sm transition-colors ease-in"
+            className="aui-thread-followup-suggestion bg-background hover:bg-muted/80 max-w-full rounded-full border px-3 py-1 text-sm transition-colors ease-in"
             prompt={suggestion.prompt}
             method="replace"
             autoSend
           >
-            {suggestion.prompt}
+            <span className="line-clamp-1 max-w-[200px] sm:max-w-none">{suggestion.prompt}</span>
           </ThreadPrimitive.Suggestion>
         ))}
       </div>

@@ -140,7 +140,7 @@ export function ChatShell() {
   const [draft, setDraft] = useState("");
   const [search, setSearch] = useState("");
   const [isImageMode, setIsImageMode] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -372,20 +372,34 @@ export function ChatShell() {
         <div className="absolute bottom-24 right-1/4 h-24 w-24 rounded-full bg-white/60 blur-2xl" />
       </div>
 
-      <div className="relative mx-auto flex min-h-screen max-w-7xl gap-4 px-3 py-3 sm:px-4 lg:px-6">
+      {/* Mobile sidebar backdrop overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/30 backdrop-blur-sm md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <div className="relative mx-auto flex h-screen max-w-7xl gap-4 px-2 py-2 sm:px-3 sm:py-3 lg:px-6 lg:py-3">
+        {/* Sidebar — fixed overlay on mobile, inline panel on desktop */}
         <aside
           className={cn(
-            "relative flex h-[calc(100vh-1.5rem)] flex-col overflow-hidden rounded-[28px] border border-white/70 bg-white/60 p-3 shadow-[0_25px_80px_-30px_rgba(2,132,199,0.45)] backdrop-blur-xl transition-all duration-300",
-            isSidebarOpen ? "w-full max-w-[320px]" : "w-[72px]",
+            "flex flex-col overflow-hidden rounded-[28px] border border-white/70 bg-white/60 p-3 shadow-[0_25px_80px_-30px_rgba(2,132,199,0.45)] backdrop-blur-xl transition-all duration-300",
+            // Mobile: fixed full-height drawer that slides in from the left
+            "fixed left-2 top-2 z-30 h-[calc(100dvh-1rem)] md:static md:z-auto md:h-[calc(100vh-1.5rem)]",
+            isSidebarOpen
+              ? "w-[min(320px,calc(100vw-2rem))]"
+              : "hidden md:flex md:w-[72px]",
           )}
         >
           <div className="flex items-center justify-between rounded-2xl border border-sky-100/80 bg-white/70 px-3 py-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white shadow-lg shadow-sky-200">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white shadow-lg shadow-sky-200">
                 <Sparkles className="h-5 w-5" />
               </div>
               {isSidebarOpen ? (
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-900">Nova AI</p>
                   <p className="text-xs text-slate-500">Chat + image studio</p>
                 </div>
@@ -394,7 +408,7 @@ export function ChatShell() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full"
+              className="h-9 w-9 shrink-0 rounded-full"
               onClick={() => setIsSidebarOpen((value) => !value)}
             >
               <Plus className={cn("h-4 w-4 transition-transform", !isSidebarOpen && "rotate-45")} />
@@ -434,9 +448,12 @@ export function ChatShell() {
                   >
                     <button
                       className="flex w-full items-start gap-3 text-left"
-                      onClick={() => setActiveConversationId(conversation.id)}
+                      onClick={() => {
+                        setActiveConversationId(conversation.id);
+                        setIsSidebarOpen(false);
+                      }}
                     >
-                      <div className="mt-0.5 rounded-xl bg-sky-100 p-2 text-sky-600">
+                      <div className="mt-0.5 shrink-0 rounded-xl bg-sky-100 p-2 text-sky-600">
                         <Bot className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -449,7 +466,8 @@ export function ChatShell() {
                       </div>
                     </button>
 
-                    <div className="mt-3 flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    {/* Action buttons — always visible on touch devices */}
+                    <div className="mt-3 flex items-center justify-end gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -474,14 +492,31 @@ export function ChatShell() {
           ) : null}
         </aside>
 
-        <main className="flex min-h-[calc(100vh-1.5rem)] flex-1 flex-col overflow-hidden rounded-[28px] border border-white/70 bg-white/55 p-3 shadow-[0_25px_80px_-30px_rgba(2,132,199,0.35)] backdrop-blur-xl sm:p-4 lg:p-5">
-          <div className="flex-1 overflow-y-auto rounded-[24px] border border-white/70 bg-white/70 p-4 sm:p-6">
+        {/* Main chat panel — always full-width on mobile, shares row on desktop */}
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[28px] border border-white/70 bg-white/55 p-2 shadow-[0_25px_80px_-30px_rgba(2,132,199,0.35)] backdrop-blur-xl sm:p-3 lg:p-5">
+          {/* Mobile top bar with hamburger */}
+          <div className="mb-2 flex items-center gap-2 md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 shrink-0 rounded-full"
+              onClick={() => setIsSidebarOpen((value) => !value)}
+              aria-label="Open sidebar"
+            >
+              <Plus className={cn("h-4 w-4 transition-transform", isSidebarOpen && "rotate-45")} />
+            </Button>
+            <p className="text-sm font-semibold text-slate-700 truncate">
+              {activeConversation?.title ?? "Nova AI"}
+            </p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto rounded-[24px] border border-white/70 bg-white/70 p-3 sm:p-4 lg:p-6">
             {!activeConversation || activeConversation.messages.length === 0 ? (
-              <div className="flex h-full min-h-[420px] flex-col items-center justify-center rounded-[24px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50/80 to-white p-8 text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white shadow-lg shadow-sky-200">
-                  <Sparkles className="h-8 w-8" />
+              <div className="flex h-full min-h-[300px] flex-col items-center justify-center rounded-[24px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50/80 to-white p-6 text-center sm:min-h-[420px] sm:p-8">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white shadow-lg shadow-sky-200 sm:h-16 sm:w-16">
+                  <Sparkles className="h-6 w-6 sm:h-8 sm:w-8" />
                 </div>
-                <h2 className="text-2xl font-semibold text-slate-900">What do you want to create today?</h2>
+                <h2 className="text-xl font-semibold text-slate-900 sm:text-2xl">What do you want to create today?</h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
                   Ask the assistant for help or switch to image mode to generate visuals directly inside this conversation.
                 </p>
@@ -498,7 +533,7 @@ export function ChatShell() {
                   >
                     <div
                       className={cn(
-                        "max-w-[82%] rounded-[24px] px-4 py-3 shadow-sm sm:max-w-[72%]",
+                        "max-w-[88%] rounded-[24px] px-3 py-2.5 shadow-sm sm:max-w-[75%] sm:px-4 sm:py-3",
                         message.role === "user"
                           ? "bg-gradient-to-br from-sky-600 to-cyan-500 text-white"
                           : "border border-slate-200 bg-slate-50/90 text-slate-700",
@@ -532,19 +567,21 @@ export function ChatShell() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-3 rounded-[24px] border border-sky-100 bg-white/85 p-2 shadow-[0_16px_40px_-18px_rgba(2,132,199,0.35)]">
+          <form onSubmit={handleSubmit} className="mt-2 rounded-[24px] border border-sky-100 bg-white/85 p-2 shadow-[0_16px_40px_-18px_rgba(2,132,199,0.35)]">
             <div className="flex items-end gap-2 rounded-[20px] border border-slate-200 bg-slate-50/80 p-2">
               <Button
                 type="button"
                 variant={isImageMode ? "default" : "outline"}
                 size="icon"
                 className={cn(
-                  "h-11 w-11 shrink-0 rounded-2xl",
+                  "h-10 w-10 shrink-0 rounded-2xl sm:h-11 sm:w-11",
                   isImageMode ? "bg-gradient-to-br from-sky-600 to-cyan-500" : "bg-white",
                 )}
                 onClick={() => setIsImageMode((value) => !value)}
+                aria-label={isImageMode ? "Switch to chat mode" : "Switch to image mode"}
+                title={isImageMode ? "Switch to chat mode" : "Switch to image mode"}
               >
-                <ImageIcon className="h-5 w-5" />
+                <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
 
               <textarea
@@ -552,7 +589,7 @@ export function ChatShell() {
                 onChange={(event) => setDraft(event.target.value)}
                 rows={1}
                 placeholder={isImageMode ? "Generate an image of..." : "Ask anything..."}
-                className="max-h-32 min-h-[44px] flex-1 resize-none border-0 bg-transparent px-2 py-2 text-sm leading-6 outline-none"
+                className="max-h-32 min-h-[40px] flex-1 resize-none border-0 bg-transparent px-2 py-2 text-sm leading-6 outline-none sm:min-h-[44px]"
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault();
@@ -563,16 +600,16 @@ export function ChatShell() {
 
               <Button
                 type="submit"
-                className="h-11 w-11 shrink-0 rounded-2xl bg-slate-900 p-0 text-white hover:bg-slate-800"
+                className="h-10 w-10 shrink-0 rounded-2xl bg-slate-900 p-0 text-white hover:bg-slate-800 sm:h-11 sm:w-11"
                 disabled={isLoading || !draft.trim()}
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <SendHorizonal className="h-5 w-5" />}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin sm:h-5 sm:w-5" /> : <SendHorizonal className="h-4 w-4 sm:h-5 sm:w-5" />}
               </Button>
             </div>
 
-            <div className="mt-2 flex items-center justify-between px-2 text-xs text-slate-500">
-              <span>{isImageMode ? "Image mode is on" : "Chat mode is on"}</span>
-              <span>Press Enter to send • Shift + Enter for a new line</span>
+            <div className="mt-2 flex items-center justify-between gap-2 px-2 text-xs text-slate-500">
+              <span className="shrink-0">{isImageMode ? "Image mode" : "Chat mode"}</span>
+              <span className="hidden text-right sm:block">Press Enter to send · Shift+Enter for new line</span>
             </div>
           </form>
         </main>
