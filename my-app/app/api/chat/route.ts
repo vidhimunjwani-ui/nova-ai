@@ -1,4 +1,5 @@
 import { streamCloudflareChat } from "@/lib/cloudflare";
+import type { UIMessage } from "ai";
 
 export async function POST(req: Request) {
   let payload: unknown;
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
 
   try {
     return await streamCloudflareChat({
-      messages,
+      messages: messages as UIMessage[],
       system,
       tools:
         tools && typeof tools === "object"

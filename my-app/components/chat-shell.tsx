@@ -75,7 +75,7 @@ function createConversation(title = "New chat"): Conversation {
 
 async function readChatText(response: Response) {
   if (!response.body) {
-    return "I’m here and ready to help.";
+    return "I'm here and ready to help.";
   }
 
   const reader = response.body.getReader();
@@ -93,6 +93,22 @@ async function readChatText(response: Response) {
 
     for (const line of lines) {
       const trimmed = line.trim();
+
+      // AI SDK v7 UIMessage stream format: lines like `0:"text chunk"` (type 0 = text delta)
+      // Also handle legacy `data:` SSE format for compatibility.
+      if (trimmed.startsWith("0:")) {
+        const raw = trimmed.slice(2).trim();
+        try {
+          const text = JSON.parse(raw);
+          if (typeof text === "string") {
+            output += text;
+          }
+        } catch {
+          // Ignore malformed stream chunks.
+        }
+        continue;
+      }
+
       if (!trimmed.startsWith("data:")) {
         continue;
       }
@@ -106,6 +122,8 @@ async function readChatText(response: Response) {
         const parsed = JSON.parse(raw);
         if (parsed.type === "text-delta" && typeof parsed.delta === "string") {
           output += parsed.delta;
+        } else if (parsed.type === "text" && typeof parsed.value === "string") {
+          output += parsed.value;
         }
       } catch {
         // Ignore malformed stream chunks.
@@ -113,7 +131,7 @@ async function readChatText(response: Response) {
     }
   }
 
-  return output.trim() || "I’m here and ready to help.";
+  return output.trim() || "I'm here and ready to help.";
 }
 
 export function ChatShell() {
