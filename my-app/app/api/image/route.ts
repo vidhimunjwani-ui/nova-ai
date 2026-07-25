@@ -1,12 +1,25 @@
 import { NextResponse } from "next/server";
-import { cloudflareConfig, getCloudflareImageEndpoint } from "@/lib/cloudflare";
+import { getCloudflareApiToken, getCloudflareImageEndpoint } from "@/lib/cloudflare";
 
 export async function POST(req: Request) {
-  if (!cloudflareConfig.apiToken || !cloudflareConfig.accountId) {
+  // Read credentials lazily at request time — never at module load time.
+  // This ensures AWS Amplify SSR Lambdas always see the runtime env values.
+  const apiToken = getCloudflareApiToken();
+  const endpoint = getCloudflareImageEndpoint();
+
+  if (!apiToken || !endpoint) {
+    // getCloudflareImageEndpoint() already logs which variable is missing.
+    console.error(
+      "[/api/image] Aborting — " +
+        `CLOUDFLARE_API_TOKEN: ${apiToken ? "set" : "MISSING"}, ` +
+        `endpoint resolved: ${endpoint ? "yes" : "no (CLOUDFLARE_ACCOUNT_ID missing)"}`,
+    );
     return NextResponse.json(
       {
         error:
-          "Missing CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID in environment. Please set these variables in .env.local.",
+          "Missing Cloudflare credentials in environment. " +
+          "Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the Amplify console " +
+          "under App settings > Environment variables.",
       },
       { status: 500 },
     );
@@ -32,23 +45,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Prompt is required." }, { status: 400 });
   }
 
-  const endpoint = getCloudflareImageEndpoint();
-
-  if (!endpoint) {
-    return NextResponse.json(
-      {
-        error:
-          "Missing CLOUDFLARE_ACCOUNT_ID in environment. Please set this variable in .env.local.",
-      },
-      { status: 500 },
-    );
-  }
-
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${cloudflareConfig.apiToken}`,
+      Authorization: `Bearer ${apiToken}`,
     },
     body: JSON.stringify({ prompt }),
   }).catch((error) => {
