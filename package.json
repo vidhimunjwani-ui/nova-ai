@@ -2,9 +2,9 @@
   "name": "chat-gpt",
   "private": true,
   "scripts": {
-    "dev": "npm --prefix my-app run dev",
-    "build": "npm --prefix my-app run build",
-    "start": "npm --prefix my-app run start",
-    "lint": "npm --prefix my-app run lint"
+    "dev": "npm --prefix my-app exec -- next dev my-app",
+    "build": "npm --prefix my-app exec -- next build my-app",
+    "start": "npm --prefix my-app exec -- next start my-app",
+    "lint": "npm --prefix my-app exec -- next lint my-app"
   }
 }
