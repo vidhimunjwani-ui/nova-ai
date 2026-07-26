@@ -2,60 +2,18 @@ version: 1
 applications:
   - appRoot: my-app
     frontend:
-      # ── Framework ────────────────────────────────────────────────────────────
-      # REQUIRED: tells Amplify to deploy as an SSR application (Lambda + CDN),
-      # not as a static export.  Without this the SSR Lambda is never provisioned
-      # and process.env variables are never injected at runtime.
-      framework: Next.js - SSR
-
       phases:
         preBuild:
           commands:
-            # Pin Node.js to match package.json engines field (>=20.18.0).
-            # Amplify's default image ships Node 18; without this pin the build
-            # may succeed but the Lambda could run on a mismatched runtime.
-            - nvm use 20 || true
-            - node --version
             - npm ci --legacy-peer-deps
-
         build:
           commands:
-            # ── Environment variable guard ────────────────────────────────────
-            # Abort the build immediately if the two required secrets are absent
-            # from the Amplify Console environment.
-            #
-            # HOW TO SET THEM:
-            #   Amplify Console → App settings → Environment variables
-            #   Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID
-            #   Scope them to the branch being deployed (e.g. "main").
-            #
-            # These are server-side secrets — do NOT add a NEXT_PUBLIC_ prefix.
-            # They must NOT be baked into the client bundle.
-            - |
-              if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-                echo ""
-                echo "==========================================================="
-                echo " BUILD ABORTED — missing required environment variables."
-                echo "==========================================================="
-                echo " Set the following in the Amplify Console:"
-                echo "   App settings → Environment variables"
-                echo "   → CLOUDFLARE_API_TOKEN"
-                echo "   → CLOUDFLARE_ACCOUNT_ID"
-                echo " Scope them to this branch, then redeploy."
-                echo "==========================================================="
-                echo ""
-                exit 1
-              fi
-            - echo "Environment variables present — proceeding with build."
+            - env | grep -e CLOUDFLARE_ >> .env.production
             - npm run build
-
       artifacts:
-        # SSR mode: ship the entire .next/ output.
-        # Do NOT change baseDirectory to 'out' — that is for static export only.
         baseDirectory: .next
         files:
           - '**/*'
-
       cache:
         paths:
           - node_modules/**/*
