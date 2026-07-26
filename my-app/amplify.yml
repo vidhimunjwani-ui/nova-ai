@@ -2,6 +2,11 @@ version: 1
 applications:
   - appRoot: my-app
     frontend:
+      # Tells Amplify to deploy this as a Next.js SSR application.
+      # Without this, Amplify may treat the app as a static export and
+      # never start the SSR Lambda — meaning API routes won't run and
+      # process.env variables set in the Amplify Console won't reach them.
+      framework: Next.js - SSR
       phases:
         preBuild:
           commands:
